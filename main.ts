@@ -58,11 +58,13 @@ try {
   process.exit(1);
 }
 
-// Confirm the copy landed intact by reading it back: a silent bad copy
-// would hand the gate a broken VIDEO.json.
-const copied = JSON.parse(readFileSync(join(OUTPUT_DIR, 'VIDEO.json'), 'utf8')) as { url?: unknown };
-if (copied.url !== url) {
-  console.error('VIDEO.json read back with a different url than validated');
+// Confirm the copy landed intact by reading it back and comparing bytes:
+// a silent bad copy would hand the gate a broken VIDEO.json. Comparing
+// bytes (not just the url field) catches any truncation or rewrite.
+const sourceBytes = readFileSync(source);
+const copiedBytes = readFileSync(join(OUTPUT_DIR, 'VIDEO.json'));
+if (!copiedBytes.equals(sourceBytes)) {
+  console.error('VIDEO.json copy differs from the source');
   process.exit(1);
 }
 console.log(`VIDEO.json OK: ${url}`);

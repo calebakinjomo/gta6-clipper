@@ -57,3 +57,12 @@ try {
   console.error(`VIDEO.json could not be copied to ${OUTPUT_DIR}: ${(err as Error).message}`);
   process.exit(1);
 }
+
+// Confirm the copy landed intact by reading it back: a silent bad copy
+// would hand the gate a broken VIDEO.json.
+const copied = JSON.parse(readFileSync(join(OUTPUT_DIR, 'VIDEO.json'), 'utf8')) as { url?: unknown };
+if (copied.url !== url) {
+  console.error('VIDEO.json read back with a different url than validated');
+  process.exit(1);
+}
+console.log(`VIDEO.json OK: ${url}`);
